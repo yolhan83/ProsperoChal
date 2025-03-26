@@ -11,8 +11,8 @@ Clone the repo
 You may need to instantiate (install deps with `julia --project -e "using Pkg; Pkg.instantiate" `)
 
 They are three ways to run this benchmark, 
-1. run the app `julia --project -e "using ProsperoChal"  1024` and time it on your operating system. This will include the startup time of julia, the kernel compiltions and the julia JIT time.
-2. run `julia --project -e "using ProsperoChal; bench_proper(ARGS)"  1024`. This won't include the startup time of julia, the kernel compiltions and the julia JIT time and will show you the best and worse times together with the mean and median times.
+1. run the app `julia --project -e "using ProsperoChal"  1024` and time it on your operating system. This will include the startup time of julia, the kernel compilations and the julia JIT time.
+2. run `julia --project -e "using ProsperoChal; bench_proper(ARGS)"  1024`. This won't include the startup time of julia, the kernel compilations and the julia JIT time and will show you the best and worse times together with the mean and median times.
 3. run `julia --project -e "using ProsperoChal; profile_cuda(ARGS)"  1024`. This will profile the cuda kernels and show you the time it took to launch and run each kernel.
 
 It should give you something like this,

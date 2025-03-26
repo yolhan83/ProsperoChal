@@ -30,8 +30,8 @@ TotalHours        : 0,00489135041666667
 TotalMinutes      : 0,293481025
 TotalSeconds      : 17,6088615
 TotalMilliseconds : 17608,8615
-
-
+```
+```julia
 -> julia --project -e "using ProsperoChal; bench_proper(ARGS)"  prospero.vm 1024
 BenchmarkTools.Trial: 4 samples with 1 evaluation per sample.
  Range (min … max):  1.354 s …   1.489 s  ┊ GC (min … max):  2.57% … 12.64%
@@ -43,6 +43,8 @@ BenchmarkTools.Trial: 4 samples with 1 evaluation per sample.
   1.35 s         Histogram: frequency by time        1.49 s <
 
  Memory estimate: 209.19 MiB, allocs estimate: 10307650.
+```
+```julia
 -> julia --project -e "using ProsperoChal; profile_cuda(ARGS)"  prospero.vm 1024
 Profiler ran for 12.6 s, capturing 480669 events.
 

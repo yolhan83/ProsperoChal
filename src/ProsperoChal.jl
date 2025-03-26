@@ -46,7 +46,7 @@ module ProsperoChal
         pp = Meta.parse(join(prog, ';'))
         @eval $pp
     end
-
+    @info "time to parse prospero.vm : "
     @time const FUN = parseit("prospero.vm")
 
     @kernel inbounds=true unsafe_indices = true function fkernel!(out, @Const(space))

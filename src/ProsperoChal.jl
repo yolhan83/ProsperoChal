@@ -55,7 +55,7 @@ module ProsperoChal
         image_size = ARGS[1]
         image_size = parse(Int, image_size)
         space = range(-1.0f0, 1.0f0, image_size) |> collect |> device
-        out = UInt8(255) .* FUN.(space,space')
+        out = UInt8(255) .* (FUN.(space,-space') .< 0 )
         out_cpu= collect(out)
         open("out.ppm", "w") do f
             write(f, "P5\n$(image_size) $(image_size)\n255\n")

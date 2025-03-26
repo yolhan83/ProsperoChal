@@ -24,14 +24,14 @@ It should give you something like this,
 Days              : 0
 Hours             : 0
 Minutes           : 0
-Seconds           : 24
-Milliseconds      : 784
-Ticks             : 247847050
-TotalDays         : 0,000286860011574074
-TotalHours        : 0,00688464027777778
-TotalMinutes      : 0,413078416666667
-TotalSeconds      : 24,784705
-TotalMilliseconds : 24784,705
+Seconds           : 16
+Milliseconds      : 686
+Ticks             : 166864491
+TotalDays         : 0,000193130197916667
+TotalHours        : 0,00463512475
+TotalMinutes      : 0,278107485
+TotalSeconds      : 16,6864491
+TotalMilliseconds : 16686,4491
 ```
 ```julia
 -> julia --project -e "using ProsperoChal; bench_proper(ARGS)"  1024

@@ -50,7 +50,7 @@ module ProsperoChal
         @eval $pp
     end
 
-    const FUN = parseit("prospero.vm")
+    @time const FUN = parseit("prospero.vm")
     function (@main)(ARGS)
         image_size = ARGS[1]
         image_size = parse(Int, image_size)

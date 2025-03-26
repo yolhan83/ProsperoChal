@@ -35,43 +35,43 @@ TotalMilliseconds : 16686,4491
 ```
 ```julia
 -> julia --project -e "using ProsperoChal; bench_proper(ARGS)"  1024
-BenchmarkTools.Trial: 63 samples with 1 evaluation per sample.
- Range (min … max):  78.232 ms … 138.553 ms  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     78.918 ms               ┊ GC (median):    0.00%
- Time  (mean ± σ):   80.246 ms ±   7.569 ms  ┊ GC (mean ± σ):  0.21% ± 1.12%
+BenchmarkTools.Trial: 436 samples with 1 evaluation per sample.
+ Range (min … max):   5.825 ms … 22.607 ms  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     10.972 ms              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   11.428 ms ±  2.674 ms  ┊ GC (mean ± σ):  1.71% ± 4.69%
 
-   █▄▃▁▆▁▃
-  ▆███████▇▆▆▇▇▁▁▁▁▁▁▁▁▁▁▁▄▄▁▄▄▄▁▄▁▁▁▁▁▁▁▁▁▁▁▁▄▁▁▁▁▁▁▁▁▁▁▁▁▁▁▄ ▁
-  78.2 ms         Histogram: frequency by time         85.2 ms <
+              ▅▄█ ▁         ▂
+  ▃▃▁▁▂▁▁▁▁▃▄▇█████▇▆██▇▇█▇██▇▇▆▆▅▃▃▄▂▂▂▃▃▃▃▂▃▂▃▃▃▁▁▁▂▁▂▃▂▃▂▃ ▃
+  5.82 ms         Histogram: frequency by time        20.6 ms <
 
- Memory estimate: 2.01 MiB, allocs estimate: 250.
+ Memory estimate: 2.01 MiB, allocs estimate: 257.
 ```
 ```julia
 -> julia --project -e "using ProsperoChal; profile_cuda(ARGS)"  1024
-Profiler ran for 83.05 ms, capturing 933 events.
+Profiler ran for 12.84 ms, capturing 933 events.
 
-Host-side activity: calling CUDA APIs took 79.64 ms (95.88% of the trace)
-┌──────────┬────────────┬───────┬─────────────────────────────────────┬─────────────────────────┐
-│ Time (%) │ Total time │ Calls │ Time distribution                   │ Name                    │
-├──────────┼────────────┼───────┼─────────────────────────────────────┼─────────────────────────┤
-│   95.88% │   79.63 ms │     2 │  39.82 ms ± 56.31  (   0.0 ‥ 79.63) │ cuStreamSynchronize     │
-│    0.72% │   599.3 µs │     1 │                                     │ cuMemcpyDtoHAsync       │
-│    0.06% │    51.1 µs │     2 │  25.55 µs ± 14.92  (  15.0 ‥ 36.1)  │ cuLaunchKernel          │
-│    0.04% │    32.6 µs │     3 │  10.87 µs ± 11.92  (   3.2 ‥ 24.6)  │ cuMemAllocFromPoolAsync │
-│    0.02% │    14.6 µs │     1 │                                     │ cuMemcpyHtoDAsync       │
-│    0.00% │     1.1 µs │     1 │                                     │ cuCtxSetCurrent         │
-│    0.00% │   200.0 ns │     1 │                                     │ cuCtxGetDevice          │
-│    0.00% │   200.0 ns │     1 │                                     │ cuDeviceGetCount        │
-└──────────┴────────────┴───────┴─────────────────────────────────────┴─────────────────────────┘
+Host-side activity: calling CUDA APIs took 9.17 ms (71.42% of the trace)
+┌──────────┬────────────┬───────┬────────────────────────────────────┬─────────────────────────┐
+│ Time (%) │ Total time │ Calls │ Time distribution                  │ Name                    │
+├──────────┼────────────┼───────┼────────────────────────────────────┼─────────────────────────┤
+│   71.41% │    9.17 ms │     2 │   4.58 ms ± 6.48   (   0.0 ‥ 9.17) │ cuStreamSynchronize     │
+│    5.06% │   650.2 µs │     1 │                                    │ cuMemcpyDtoHAsync       │
+│    0.40% │    50.8 µs │     2 │   25.4 µs ± 16.55  (  13.7 ‥ 37.1) │ cuLaunchKernel          │
+│    0.10% │    13.3 µs │     1 │                                    │ cuMemcpyHtoDAsync       │
+│    0.06% │     7.7 µs │     3 │   2.57 µs ± 0.7    (   1.9 ‥ 3.3)  │ cuMemAllocFromPoolAsync │
+│    0.01% │     1.0 µs │     1 │                                    │ cuCtxSetCurrent         │
+│    0.00% │   200.0 ns │     1 │                                    │ cuDeviceGetCount        │
+│    0.00% │   200.0 ns │     1 │                                    │ cuCtxGetDevice          │
+└──────────┴────────────┴───────┴────────────────────────────────────┴─────────────────────────┘
 
-Device-side activity: GPU was busy for 80.88 ms (97.39% of the trace)
+Device-side activity: GPU was busy for 10.34 ms (80.55% of the trace)
 ┌──────────┬────────────┬───────┬───────────────────────────────────────────────────────────────────────────────────────────────
 │ Time (%) │ Total time │ Calls │ Name                                                                                         ⋯
 ├──────────┼────────────┼───────┼───────────────────────────────────────────────────────────────────────────────────────────────
-│   97.27% │   80.79 ms │     1 │ gpu_broadcast_kernel_cartesian(CompilerMetadata<DynamicSize, DynamicCheck, void, CartesianIn ⋯
-│    0.11% │   92.86 µs │     1 │ [copy device to pageable memory]                                                             ⋯
-│    0.00% │    1.34 µs │     1 │ gpu_broadcast_kernel_linear(CompilerMetadata<DynamicSize, DynamicCheck, void, CartesianIndic ⋯
-│    0.00% │    1.02 µs │     1 │ [copy pageable to device memory]                                                             ⋯
+│   78.05% │   10.02 ms │     1 │ gpu_broadcast_kernel_cartesian(CompilerMetadata<DynamicSize, DynamicCheck, void, CartesianIn ⋯
+│    2.44% │  313.82 µs │     1 │ [copy device to pageable memory]                                                             ⋯
+│    0.05% │    5.79 µs │     1 │ gpu_broadcast_kernel_linear(CompilerMetadata<DynamicSize, DynamicCheck, void, CartesianIndic ⋯
+│    0.01% │     1.5 µs │     1 │ [copy pageable to device memory]                                                             ⋯
 └──────────┴────────────┴───────┴───────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                                 1 column omitted
 ```

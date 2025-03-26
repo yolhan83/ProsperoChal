@@ -78,4 +78,18 @@ Device-side activity: GPU was busy for 21.29 ms (89.68% of the trace)
 
 ### Side notes
 
-To run the benchmarks on cpu, you need to change the 4th line in ProsperoChal.jl being `const device = CUDA.cu` to `const device = identity`. Then you can run `julia -t auto --project -e "using ProsperoChal" 1024` which will use all threads available on your system.
+To run the benchmarks on cpu, you need to change the 4th line in ProsperoChal.jl being `const device = CUDA.cu` to `const device = identity`. Then you can run `julia -t auto --project -e "using ProsperoChal" 1024` which will use all threads available on your system. 
+You should get something around,
+```julia
+> julia -t auto --project -e "using ProsperoChal; bench_proper(ARGS)"  1024
+BenchmarkTools.Trial: 11 samples with 1 evaluation per sample.
+ Range (min … max):  489.620 ms … 500.339 ms  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     492.213 ms               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   493.293 ms ±   3.262 ms  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+  █  ▁        ▁▁▁        ▁      █       ▁                     ▁  
+  █▁▁█▁▁▁▁▁▁▁▁███▁▁▁▁▁▁▁▁█▁▁▁▁▁▁█▁▁▁▁▁▁▁█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█ ▁
+  490 ms           Histogram: frequency by time          500 ms <
+
+ Memory estimate: 2.08 MiB, allocs estimate: 1459.
+```

@@ -1,8 +1,7 @@
 module ProsperoChal
-    using CUDA,BenchmarkTools
+    using CUDA,BenchmarkTools,KernelAbstractions
     const T = Float16
     const device = CUDA.cu # use identity for cpu
-
     function parseit(filename)
         prog = String[]
         push!(prog, "@fastmath function(x,y) ")
@@ -11,36 +10,34 @@ module ProsperoChal
             parts = split(line, ' ')
             var = parts[1]
             op = parts[2]
-    
             if length(parts) > 2
                 arg1 = parts[3]
             end
             if length(parts) > 3
                 arg2 = parts[4]
             end
-    
             if op=="const"
-                push!(prog, string(var, '=', "T(",arg1,")"))
+                push!(prog, "$var = T($arg1)")
             elseif op=="var-x"
-                push!(prog, string(var, "=x"))
+                push!(prog, "$var = x")
             elseif op=="var-y"
-                push!(prog, string(var, "=y"))
+                push!(prog, "$var = y")
             elseif op=="mul"
-                push!(prog, string(var, '=',arg1,'*',arg2))
+                push!(prog,"$var = $arg1 * $arg2")
             elseif op=="add"
-                push!(prog, string(var, '=',arg1,'+',arg2))
+                push!(prog,"$var = $arg1 + $arg2")
             elseif op=="sub"
-                push!(prog, string(var, '=',arg1,'-',arg2))
+                push!(prog,"$var = $arg1 - $arg2")
             elseif op=="neg"
-                push!(prog, string(var, "= -",arg1))
+                push!(prog,"$var = -$arg1")
             elseif op=="max"
-                push!(prog, string(var, "=max(", arg1, ',', arg2, ")"))
+                push!(prog,"$var = max($arg1, $arg2)")
             elseif op=="min"
-                push!(prog, string(var, "=min(", arg1, ',', arg2, ")"))
+                push!(prog,"$var = min($arg1, $arg2)")
             elseif op=="square"
-                push!(prog, string(var, '=', arg1, '*', arg1))
+                push!(prog,"$var = $arg1 * $arg1")
             elseif op=="sqrt"
-                push!(prog, string(var, "=sqrt(",arg1,")"))
+                push!(prog,"$var = sqrt($arg1)")
             else
                 error("unknown op: $op /$line/")
             end
@@ -50,14 +47,21 @@ module ProsperoChal
         @eval $pp
     end
 
-    const FUN = parseit("prospero.vm")
+    @time const FUN = parseit("prospero.vm")
+
+    @kernel inbounds=true unsafe_indices = true function fkernel!(out, @Const(space))
+        i, j = @index(Global, NTuple)
+        out[i,j] = 0xff*(FUN(space[i],-space[j]) < 0)
+    end
     function (@main)(ARGS)
         image_size = ARGS[1]
         image_size = parse(Int, image_size)
         space = range(-one(T), one(T), image_size) |> collect |> device
-        O = UInt8(255)
-        f(si,sj) = O*(FUN(si,sj) < 0)
-        out = f.(space,-space')
+        bck = KernelAbstractions.get_backend(space)
+        out = KernelAbstractions.zeros(bck,UInt8,image_size, image_size)
+        f! = fkernel!(bck)
+        f!(out, space;ndrange=(image_size, image_size))
+        KernelAbstractions.synchronize(bck)
         out_cpu= collect(out)
         open("out.ppm", "w") do f
             write(f, "P5\n$(image_size) $(image_size)\n255\n")

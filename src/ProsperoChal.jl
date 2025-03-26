@@ -1,7 +1,7 @@
 module ProsperoChal
     using CUDA,BenchmarkTools,KernelAbstractions
     const T = Float16
-    const device = identity#CUDA.cu # use identity for cpu
+    const device = CUDA.cu # use identity for cpu
     function parseit(filename)
         prog = String[]
         push!(prog, "@fastmath function(x,y) ")

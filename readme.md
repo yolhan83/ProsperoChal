@@ -78,6 +78,8 @@ Device-side activity: GPU was busy for 21.29 ms (89.68% of the trace)
 
 ### Side notes
 
+1. How to run on cpu ?
+
 To run the benchmarks on cpu, you need to change the 4th line in ProsperoChal.jl being `const device = CUDA.cu` to `const device = identity`. Then you can run `julia -t auto --project -e "using ProsperoChal" 1024` which will use all threads available on your system. 
 You should get something around,
 ```julia
@@ -93,3 +95,13 @@ BenchmarkTools.Trial: 11 samples with 1 evaluation per sample.
 
  Memory estimate: 2.08 MiB, allocs estimate: 1459.
 ```
+
+2. How to run on non-nvidia GPU ?
+This is also quite easy to do, follow this :
+
+- remove cuda : `julia --project -e "using Pkg; Pkg.rm(String(:CUDA))"`
+- add your gpu package (AMDGPU.jl for AMD gpu, ONEAPI.jl for intel gpu and Metal.jl for apple gpu) : `julia --project -e "using Pkg; Pkg.add(String(:YOUR_GPU_PACKAGE))"`
+- change the 1st line in ProsperoChal.jl being `using CUDA,BenchmarkTools,KernelAbstractions` to `using YOUR_GPU_PACKAGE,BenchmarkTools,KernelAbstractions`
+- change the 4th line in ProsperoChal.jl being `const device = CUDA.cu` to `const device = ` the function of your gpu package that transfer a cpu array to a gpu array.
+- run `julia --project -e "using ProsperoChal" 1024`
+

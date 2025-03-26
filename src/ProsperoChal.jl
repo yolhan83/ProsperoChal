@@ -20,7 +20,7 @@ module ProsperoChal
             end
     
             if op=="const"
-                push!(prog, string(var, '=', arg1))
+                push!(prog, string(var, '=', "T(",arg1,")"))
             elseif op=="var-x"
                 push!(prog, string(var, "=x"))
             elseif op=="var-y"
@@ -50,7 +50,7 @@ module ProsperoChal
         @eval $pp
     end
 
-    @time const FUN = parseit("prospero.vm")
+    const FUN = parseit("prospero.vm")
     function (@main)(ARGS)
         image_size = ARGS[1]
         image_size = parse(Int, image_size)

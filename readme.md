@@ -1,4 +1,4 @@
-## ProsperoChal is an attenmpt to the Prospero Challenge (https://www.mattkeeter.com/projects/prospero/) in julia.
+## ProsperoChal is an attempt to the Prospero Challenge (https://www.mattkeeter.com/projects/prospero/) in julia.
 
 ### Prerequisites
 1. Having Julia installed.

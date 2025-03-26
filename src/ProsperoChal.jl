@@ -2,115 +2,72 @@ module ProsperoChal
     using CUDA,BenchmarkTools
     const T = Float16
     const device = CUDA.cu # use identity for cpu
-    const matType = CuMatrix{T} # use Matrix{T} for cpu
 
-    """
-        Will broadcast the operation inplace if possible, otherwise will create a new array
-        This is the version for two arguments operations
-    """
-    function double_broadcast_op!(v,op,name,args)
-        if haskey(v,name)
-            broadcast!(op,v[name],v[args[1]],v[args[2]])
-        else
-            v[name] = broadcast(op,v[args[1]],v[args[2]])
+    function parseit(filename)
+        prog = String[]
+        push!(prog, "function(x,y) ")
+        for line in eachline(filename)
+            (length(line) == 0 || line[1]=='#') && continue
+            parts = split(line, ' ')
+            var = parts[1]
+            op = parts[2]
+    
+            if length(parts) > 2
+                arg1 = parts[3]
+            end
+            if length(parts) > 3
+                arg2 = parts[4]
+            end
+    
+            if op=="const"
+                push!(prog, string(var, '=', arg1))
+            elseif op=="var-x"
+                push!(prog, string(var, "=x"))
+            elseif op=="var-y"
+                push!(prog, string(var, "=y"))
+            elseif op=="mul"
+                push!(prog, string(var, '=',arg1,'*',arg2))
+            elseif op=="add"
+                push!(prog, string(var, '=',arg1,'+',arg2))
+            elseif op=="sub"
+                push!(prog, string(var, '=',arg1,'-',arg2))
+            elseif op=="neg"
+                push!(prog, string(var, "= -",arg1))
+            elseif op=="max"
+                push!(prog, string(var, "=ifelse(", arg1, ">", arg2, ",", arg1, ", ", arg2, ")"))
+            elseif op=="min"
+                push!(prog, string(var, "=ifelse(", arg1, ">", arg2, ",", arg2, ", ", arg1, ")"))
+            elseif op=="square"
+                push!(prog, string(var, '=', arg1, '*', arg1))
+            elseif op=="sqrt"
+                push!(prog, string(var, "=sqrt(",arg1,")"))
+            else
+                error("unknown op: $op /$line/")
+            end
         end
-        return nothing
+        push!(prog, "end")
+        pp = Meta.parse(join(prog, ';'))
+        @eval $pp
     end
-    """
-        Will broadcast the operation inplace if possible, otherwise will create a new array
-        This is the version for one arguments operations
-    """
-    function single_broadcast_op!(v,op,name,args)
-        if haskey(v,name)
-            broadcast!(op,v[name],v[args[1]])
-        else
-            v[name] = broadcast(op,v[args[1]])
-        end
-        return nothing
-    end
-    """
-        Will copy the array inplace if possible, otherwise will create a new array
-    """
-    function copytoifexists!(v,name,x)
-        if haskey(v,name)
-            copyto!(v[name],x)
-        else
-            v[name] = x
-        end
-        return nothing
-    end
-    """
-        Will change the constant matrix inplace if possible, otherwise will create a new array
-    """
-    function const_change!(v,name,c)
-        if haskey(v,name)
-            v[name] .= c
-        else
-            v[name] = [c;;] |> device
-        end
-        return nothing
-    end
-    """
-        Will process the operation depending on the operator
-    """
-    function process_op!(v,op,name,args,x,y)
-        if op == "var-x"
-            copytoifexists!(v,name,x)
-        elseif op == "var-y"
-            copytoifexists!(v,name,y)
-        elseif op == "const"
-            const_change!(v,name,parse(T, args[1]))
-        elseif op == "add"
-            double_broadcast_op!(v,+,name,args) # v[args[1]] .+ v[args[2]]
-        elseif op == "sub"
-            double_broadcast_op!(v,-,name,args) #v[args[1]] .- v[args[2]]
-        elseif op == "mul"
-            double_broadcast_op!(v,*,name,args) #v[args[1]] .* v[args[2]]
-        elseif op == "max"
-            double_broadcast_op!(v,max,name,args) #max.(v[args[1]], v[args[2]])
-        elseif op == "min"
-            double_broadcast_op!(v,min,name,args) #min.(v[args[1]], v[args[2]])
-        elseif op == "neg"
-            single_broadcast_op!(v,-,name,args) #-v[args[1]]
-        elseif op == "square"
-            single_broadcast_op!(v,x->x^2,name,args) #v[args[1]].^2
-        elseif op == "sqrt"
-            single_broadcast_op!(v,sqrt,name,args) #sqrt.(v[args[1]])
-        else
-            error("unknown opcode '$op'")
-        end
-        return nothing
-    end
+    const FUN = parseit("prospero.vm")
     function (@main)(ARGS)
-        file, image_size = ARGS
+        image_size = ARGS[1]
         image_size = parse(Int, image_size)
         space = range(-1.0f0, 1.0f0, image_size)
         x = T[space[j] for i in 1:image_size, j in 1:image_size]  |> device
         y = T[-space[i] for i in 1:image_size, j in 1:image_size] |> device
-        v = Dict{String, matType}()
-        final_key = ""
-        for line in eachline(file)
-            if startswith(line, "#")
-                continue
-            end
-            tokens = split(line)
-            name = tokens[1]  
-            op = tokens[2]   
-            args = @view(tokens[3:end])
-            final_key = name  
-            process_op!(v,op,name,args,x,y)
-        end
-        out = v[final_key]
+        out =  FUN.(x,y')
         img = ifelse.(out .< 0, UInt8(255), UInt8(0)) |> collect
         img = permutedims(img)
         open("out.ppm", "w") do f
             write(f, "P5\n$(image_size) $(image_size)\n255\n")
             write(f, vec(img))
         end
+        nothing
         return nothing
     end
     function bench_proper(ARGS)
-        b = @benchmark main(ARGS)
+        b = @benchmark main($ARGS)
         display(b)
         return nothing
     end

@@ -6,6 +6,7 @@
 3. Care a little about the Prospero Challenge ...
 
 ### Usage
+Clone the repo
 
 They are three ways to run this benchmark, 
 1. run the app `julia --project -e "using ProsperoChal"  prospero.vm 1024` and time it on your operating system. This will include the startup time of julia, the kernel compiltions and the julia JIT time.

@@ -1,0 +1,12 @@
+name = "ProsperoChal"
+uuid = "7a0543e3-8c78-4ad0-a06e-6ff888932153"
+authors = ["yolhan83 <yolhan@laposte.net>"]
+version = "0.1.0"
+
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+
+[compat]
+BenchmarkTools = "1.6.0"
+CUDA = "5.7.1"

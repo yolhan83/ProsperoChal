@@ -5,7 +5,7 @@ module ProsperoChal
 
     function parseit(filename)
         prog = String[]
-        push!(prog, "function(x,y) ")
+        push!(prog, "@fastmath function(x,y) ")
         for line in eachline(filename)
             (length(line) == 0 || line[1]=='#') && continue
             parts = split(line, ' ')
@@ -34,9 +34,9 @@ module ProsperoChal
             elseif op=="neg"
                 push!(prog, string(var, "= -",arg1))
             elseif op=="max"
-                push!(prog, string(var, "=ifelse(", arg1, ">", arg2, ",", arg1, ", ", arg2, ")"))
+                push!(prog, string(var, "=max(", arg1, ',', arg2, ")"))
             elseif op=="min"
-                push!(prog, string(var, "=ifelse(", arg1, ">", arg2, ",", arg2, ", ", arg1, ")"))
+                push!(prog, string(var, "=min(", arg1, ',', arg2, ")"))
             elseif op=="square"
                 push!(prog, string(var, '=', arg1, '*', arg1))
             elseif op=="sqrt"
@@ -49,19 +49,17 @@ module ProsperoChal
         pp = Meta.parse(join(prog, ';'))
         @eval $pp
     end
+
     const FUN = parseit("prospero.vm")
     function (@main)(ARGS)
         image_size = ARGS[1]
         image_size = parse(Int, image_size)
-        space = range(-1.0f0, 1.0f0, image_size)
-        x = T[space[j] for i in 1:image_size, j in 1:image_size]  |> device
-        y = T[-space[i] for i in 1:image_size, j in 1:image_size] |> device
-        out =  FUN.(x,y')
-        img = ifelse.(out .< 0, UInt8(255), UInt8(0)) |> collect
-        img = permutedims(img)
+        space = range(-1.0f0, 1.0f0, image_size) |> collect |> device
+        out = UInt8(255) .* FUN.(space,space')
+        out_cpu= collect(out)
         open("out.ppm", "w") do f
             write(f, "P5\n$(image_size) $(image_size)\n255\n")
-            write(f, vec(img))
+            write(f, vec(out_cpu))
         end
         nothing
         return nothing
@@ -72,6 +70,7 @@ module ProsperoChal
         return nothing
     end
     function profile_cuda(ARGS)
+        main(ARGS)
         display(CUDA.@profile main(ARGS))
         return nothing
     end
